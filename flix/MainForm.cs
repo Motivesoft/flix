@@ -15,7 +15,7 @@ namespace flix
     {
         private readonly string defaultLocation = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
 
-        private readonly Queue<string> directoryHistory = new Queue<string>();
+        private readonly Stack<string> directoryHistory = new Stack<string>();
 
         private readonly ListViewColumnSorter listViewColumnSorter = new ListViewColumnSorter();
 
@@ -28,6 +28,7 @@ namespace flix
 
             // Startup
             var location = defaultLocation;
+            var selection = "";
             if ( args.Length > 0 )
             {
                 var suppliedLocation = args[ 0 ];
@@ -38,19 +39,29 @@ namespace flix
                 else if ( File.Exists( suppliedLocation ) )
                 {
                     location = Directory.GetParent( suppliedLocation ).FullName;
+                    selection = Path.GetFullPath( suppliedLocation );
                 }
             }
 
             // Run
-            OpenDirectoryView( location );
+            OpenDirectoryView( location, selection );
         }
 
-        private void OpenDirectoryView( string location )
+        private void OpenDirectoryView( string location, string selection = "" )
         {
+            if ( !Directory.Exists( location ) )
+            {
+                MessageBox.Show( $"{location} is not a directory", "Error" );
+                return;
+            }
+
             textLocation.Text = location;
 
             try
             {
+                // Set this from the provided value or configure it later
+                var selectionItem = selection;
+
                 listBrowser.BeginUpdate();
                 listBrowser.Items.Clear();
                 listBrowser.Tag = location;
@@ -76,6 +87,18 @@ namespace flix
                     lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, fileType ) );
 
                     listBrowser.Items.Add( lfItem );
+
+                    // Make a default selection if there isn't a provided one
+                    if ( string.IsNullOrEmpty( selectionItem ) )
+                    {
+                        selectionItem = dInfo.FullName;
+                    }
+
+                    if ( dInfo.FullName.Equals( selectionItem ) )
+                    {
+                        lfItem.Selected = true;
+                        lfItem.Focused = true;
+                    }
                 }
 
                 foreach ( var file in Directory.GetFiles( location ) )
@@ -101,18 +124,21 @@ namespace flix
                     lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, fileType ) );
 
                     listBrowser.Items.Add( lfItem );
-                }
 
-                var locationPath = Path.GetFullPath( location );
-                if ( directoryHistory.Count > 0 )
-                {
-                    if ( locationPath.Equals( Path.GetFullPath( directoryHistory.Peek() ) ) )
+                    // Make a default selection if there isn't a provided one
+                    if ( string.IsNullOrEmpty( selectionItem ) )
                     {
-                        directoryHistory.Dequeue();
+                        selectionItem = fInfo.FullName;
+                    }
+
+                    if ( fInfo.FullName.Equals( selection ) )
+                    {
+                        lfItem.Selected = true;
+                        lfItem.Focused = true;
                     }
                 }
 
-                directoryHistory.Enqueue( locationPath );
+                directoryHistory.Push( location );
             }
             finally
             {
@@ -193,9 +219,10 @@ namespace flix
             else if ( e.KeyCode == Keys.Back )
             {
                 // Remove the directory we're running from
-                if ( directoryHistory.Count > 0 )
+                if ( directoryHistory.Count > 1 )
                 {
-                    OpenDirectoryView( directoryHistory.Dequeue() );
+                    var selection = Path.GetFullPath( directoryHistory.Pop() );
+                    OpenDirectoryView( directoryHistory.Pop(), selection );
                 }
             }
         }
