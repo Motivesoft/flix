@@ -11,6 +11,8 @@ namespace flix
 {
     public class ListViewColumnSorter : IComparer
     {
+        private readonly Dictionary<Type, int> SortableTypes = new Dictionary<Type, int>();
+
         /// <summary>
         /// Specifies the column to be sorted
         /// </summary>
@@ -39,29 +41,30 @@ namespace flix
 
             // Initialize the CaseInsensitiveComparer object
             ObjectCompare = new CaseInsensitiveComparer();
+
+            SortableTypes[ typeof( DirectoryInfo ) ] = 1;
+            SortableTypes[ typeof( FileInfo ) ] = 2;
         }
 
         public int Compare( object x, object y )
         {
+            int compareResult = 0;
+
             ListViewItem xItem = x as ListViewItem;
             ListViewItem yItem = y as ListViewItem;
 
             // Failsafe
             if ( xItem == null || yItem == null )
             {
-                return 0;
+                return compareResult;
             }
 
-            int compareResult = 0;
-
-            // Group things together
-            if ( xItem.Tag.GetType() != yItem.Tag.GetType() )
+            // Group things together - sort by type if different
+            var xTypeValue = SortableTypes.GetValueOrDefault( xItem.Tag.GetType(), 0 );
+            var yTypeValue = SortableTypes.GetValueOrDefault( yItem.Tag.GetType(), 0 );
+            if ( xTypeValue != yTypeValue )
             {
-                var Types = new Dictionary<Type, int>();
-                Types[ typeof( DirectoryInfo ) ] = 1;
-                Types[ typeof( FileInfo ) ] = 2;
-
-                compareResult = Types[ xItem.Tag.GetType() ].CompareTo( Types[ yItem.Tag.GetType() ] );
+                compareResult = xTypeValue.CompareTo( yTypeValue );
             }
             else
             {
@@ -95,6 +98,7 @@ namespace flix
                 }
             }
 
+            // Ascending or descending
             if ( OrderOfSort == SortOrder.Descending )
             {
                 compareResult = -compareResult;
