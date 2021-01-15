@@ -17,10 +17,16 @@ namespace flix
 
         private readonly List<string> directoryHistory = new List<string>();
 
+        private readonly ListViewColumnSorter listViewColumnSorter = new ListViewColumnSorter();
+
         public MainForm( string[] args )
         {
             InitializeComponent();
 
+            // Additional forms initialization
+            listBrowser.ListViewItemSorter = listViewColumnSorter;
+
+            // Startup
             var location = defaultLocation;
             if ( args.Length > 0 )
             {
@@ -35,6 +41,7 @@ namespace flix
                 }
             }
 
+            // Run
             OpenDirectoryView( location );
         }
 
@@ -74,6 +81,31 @@ namespace flix
             {
                 listBrowser.EndUpdate();
             }
+        }
+
+        private void listBrowser_ColumnClick( object sender, ColumnClickEventArgs e )
+        {
+            if ( e.Column == listViewColumnSorter.SortColumn )
+            {
+                // Reverse the current sort direction for this column.
+                if ( listViewColumnSorter.Order == SortOrder.Ascending )
+                {
+                    listViewColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    listViewColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                listViewColumnSorter.SortColumn = e.Column;
+                listViewColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            listBrowser.Sort();
         }
     }
 }

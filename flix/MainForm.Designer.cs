@@ -82,6 +82,7 @@ namespace flix
             this.listBrowser.TabIndex = 1;
             this.listBrowser.UseCompatibleStateImageBehavior = false;
             this.listBrowser.View = System.Windows.Forms.View.Details;
+            this.listBrowser.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listBrowser_ColumnClick);
             // 
             // columnName
             // 
