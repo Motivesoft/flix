@@ -72,7 +72,9 @@ namespace flix
             this.columnSize,
             this.columnType});
             this.listBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBrowser.FullRowSelect = true;
             this.listBrowser.HideSelection = false;
+            this.listBrowser.LabelWrap = false;
             this.listBrowser.Location = new System.Drawing.Point(3, 32);
             this.listBrowser.Name = "listBrowser";
             this.listBrowser.Size = new System.Drawing.Size(478, 426);
@@ -97,6 +99,7 @@ namespace flix
             // 
             this.columnSize.Name = "columnSize";
             this.columnSize.Text = "Size";
+            this.columnSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.columnSize.Width = 100;
             // 
             // columnType
@@ -107,7 +110,7 @@ namespace flix
             // 
             // imagesSmall
             // 
-            this.imagesSmall.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.imagesSmall.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
             this.imagesSmall.ImageSize = new System.Drawing.Size(16, 16);
             this.imagesSmall.TransparentColor = System.Drawing.Color.Transparent;
             // 
