@@ -63,6 +63,8 @@ namespace flix
             this.textLocation.Name = "textLocation";
             this.textLocation.Size = new System.Drawing.Size(498, 23);
             this.textLocation.TabIndex = 0;
+            this.textLocation.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textLocation_KeyDown);
+            this.textLocation.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.textLocation_PreviewKeyDown);
             // 
             // listBrowser
             // 
@@ -83,6 +85,8 @@ namespace flix
             this.listBrowser.UseCompatibleStateImageBehavior = false;
             this.listBrowser.View = System.Windows.Forms.View.Details;
             this.listBrowser.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listBrowser_ColumnClick);
+            this.listBrowser.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBrowser_KeyDown);
+            this.listBrowser.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.listBrowser_PreviewKeyDown);
             // 
             // columnName
             // 

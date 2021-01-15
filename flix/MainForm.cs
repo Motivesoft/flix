@@ -15,7 +15,7 @@ namespace flix
     {
         private readonly string defaultLocation = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
 
-        private readonly List<string> directoryHistory = new List<string>();
+        private readonly Queue<string> directoryHistory = new Queue<string>();
 
         private readonly ListViewColumnSorter listViewColumnSorter = new ListViewColumnSorter();
 
@@ -53,6 +53,7 @@ namespace flix
             {
                 listBrowser.BeginUpdate();
                 listBrowser.Items.Clear();
+                listBrowser.Tag = location;
 
                 foreach ( var directory in Directory.GetDirectories( location ) )
                 {
@@ -101,6 +102,17 @@ namespace flix
 
                     listBrowser.Items.Add( lfItem );
                 }
+
+                var locationPath = Path.GetFullPath( location );
+                if ( directoryHistory.Count > 0 )
+                {
+                    if ( locationPath.Equals( Path.GetFullPath( directoryHistory.Peek() ) ) )
+                    {
+                        directoryHistory.Dequeue();
+                    }
+                }
+
+                directoryHistory.Enqueue( locationPath );
             }
             finally
             {
@@ -131,6 +143,61 @@ namespace flix
 
             // Perform the sort with these new sort options.
             listBrowser.Sort();
+        }
+
+        private void textLocation_PreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
+        {
+            if ( e.KeyCode == Keys.D && e.Alt )
+            {
+                textLocation.SelectAll();
+            }
+        }
+
+        private void textLocation_KeyDown( object sender, KeyEventArgs e )
+        {
+            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
+            {
+                OpenDirectoryView( textLocation.Text );
+                e.Handled = true;
+            }
+            else if ( e.KeyCode == Keys.Down )
+            {
+                listBrowser.Focus();
+                e.Handled = true;
+            }
+        }
+
+        private void listBrowser_PreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
+        {
+            if ( e.KeyCode == Keys.D && e.Alt )
+            {
+                textLocation.Focus();
+                textLocation.SelectAll();
+            }
+        }
+
+        private void listBrowser_KeyDown( object sender, KeyEventArgs e )
+        {
+            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
+            {
+                foreach ( var selectedItem in listBrowser.SelectedItems )
+                {
+                    var item = ( selectedItem as ListViewItem ).Tag;
+                    if ( item is DirectoryInfo )
+                    {
+                        OpenDirectoryView( ( item as DirectoryInfo ).FullName );
+                    }
+                }
+                e.Handled = true;
+            }
+            else if ( e.KeyCode == Keys.Back )
+            {
+                // Remove the directory we're running from
+                if ( directoryHistory.Count > 0 )
+                {
+                    OpenDirectoryView( directoryHistory.Dequeue() );
+                }
+            }
         }
     }
 }
