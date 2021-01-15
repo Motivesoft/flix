@@ -53,7 +53,7 @@ namespace flix
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(484, 461);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(504, 461);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // textLocation
@@ -61,7 +61,7 @@ namespace flix
             this.textLocation.Dock = System.Windows.Forms.DockStyle.Top;
             this.textLocation.Location = new System.Drawing.Point(3, 3);
             this.textLocation.Name = "textLocation";
-            this.textLocation.Size = new System.Drawing.Size(478, 23);
+            this.textLocation.Size = new System.Drawing.Size(498, 23);
             this.textLocation.TabIndex = 0;
             // 
             // listBrowser
@@ -77,7 +77,7 @@ namespace flix
             this.listBrowser.LabelWrap = false;
             this.listBrowser.Location = new System.Drawing.Point(3, 32);
             this.listBrowser.Name = "listBrowser";
-            this.listBrowser.Size = new System.Drawing.Size(478, 426);
+            this.listBrowser.Size = new System.Drawing.Size(498, 426);
             this.listBrowser.SmallImageList = this.imagesSmall;
             this.listBrowser.TabIndex = 1;
             this.listBrowser.UseCompatibleStateImageBehavior = false;
@@ -119,7 +119,7 @@ namespace flix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 461);
+            this.ClientSize = new System.Drawing.Size(504, 461);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "MainForm";
             this.Text = "Form1";

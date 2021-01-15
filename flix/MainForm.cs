@@ -54,6 +54,29 @@ namespace flix
                 listBrowser.BeginUpdate();
                 listBrowser.Items.Clear();
 
+                foreach ( var directory in Directory.GetDirectories( location ) )
+                {
+                    var dInfo = new DirectoryInfo( directory );
+                    var fileType = FileTypes.GetFileTypeDescription( dInfo.FullName );
+
+                    if ( !imagesSmall.Images.ContainsKey( dInfo.FullName ) )
+                    {
+                        imagesSmall.Images.Add( dInfo.FullName, FileIcons.GetSmallIcon( dInfo.FullName ) );
+                    }
+
+                    var lfItem = new ListViewItem {
+                        Tag = dInfo,
+                        Text = dInfo.Name,
+                        ImageKey = dInfo.FullName,
+                    };
+
+                    lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, $"{dInfo.LastWriteTime:g}" ) );
+                    lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, $"" ) );
+                    lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, fileType ) );
+
+                    listBrowser.Items.Add( lfItem );
+                }
+
                 foreach ( var file in Directory.GetFiles( location ) )
                 {
                     var fInfo = new FileInfo( file );
@@ -65,10 +88,12 @@ namespace flix
                         imagesSmall.Images.Add( fInfo.FullName, FileIcons.GetSmallIcon( fInfo.FullName ) );
                     }
 
-                    var lfItem = new ListViewItem();
-                    lfItem.Tag = fInfo;
-                    lfItem.Text = fInfo.Name;
-                    lfItem.ImageKey = fInfo.FullName;
+                    var lfItem = new ListViewItem
+                    {
+                        Tag = fInfo,
+                        Text = fInfo.Name,
+                        ImageKey = fInfo.FullName,
+                    };
 
                     lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, $"{fInfo.LastWriteTime:g}" ) );
                     lfItem.SubItems.Add( new ListViewItem.ListViewSubItem( lfItem, $"{length:N0} KB" ) );
