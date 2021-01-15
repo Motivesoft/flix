@@ -46,39 +46,53 @@ namespace flix
             ListViewItem xItem = x as ListViewItem;
             ListViewItem yItem = y as ListViewItem;
 
+            // Failsafe
             if ( xItem == null || yItem == null )
             {
                 return 0;
             }
 
             int compareResult = 0;
-            switch ( ColumnToSort )
+
+            // Group things together
+            if ( xItem.Tag.GetType() != yItem.Tag.GetType() )
             {
-                case 0:
-                    compareResult = ObjectCompare.Compare( xItem.Text, yItem.Text );
-                    break;
+                var Types = new Dictionary<Type, int>();
+                Types[ typeof( DirectoryInfo ) ] = 1;
+                Types[ typeof( FileInfo ) ] = 2;
 
-                case 1: // Date
+                compareResult = Types[ xItem.Tag.GetType() ].CompareTo( Types[ yItem.Tag.GetType() ] );
+            }
+            else
+            {
+                switch ( ColumnToSort )
                 {
-                    var xDate = ( xItem.Tag is FileSystemInfo ) ? ( xItem.Tag as FileSystemInfo ).LastWriteTime : DateTime.MinValue;
-                    var yDate = ( yItem.Tag is FileSystemInfo ) ? ( yItem.Tag as FileSystemInfo ).LastWriteTime : DateTime.MinValue;
+                    case 0:
+                        compareResult = ObjectCompare.Compare( xItem.Text, yItem.Text );
+                        break;
 
-                    compareResult = xDate.CompareTo( yDate );
-                    break;
+                    case 1: // Date
+                    {
+                        var xDate = ( xItem.Tag is FileSystemInfo ) ? ( xItem.Tag as FileSystemInfo ).LastWriteTime : DateTime.MinValue;
+                        var yDate = ( yItem.Tag is FileSystemInfo ) ? ( yItem.Tag as FileSystemInfo ).LastWriteTime : DateTime.MinValue;
+
+                        compareResult = xDate.CompareTo( yDate );
+                        break;
+                    }
+
+                    case 2: // Length
+                    {
+                        var xLength = ( xItem.Tag is FileInfo ) ? ( xItem.Tag as FileInfo ).Length : -1;
+                        var yLength = ( yItem.Tag is FileInfo ) ? ( yItem.Tag as FileInfo ).Length : -1;
+
+                        compareResult = xLength.CompareTo( yLength );
+                        break;
+                    }
+
+                    case 3: // Type
+                        compareResult = ObjectCompare.Compare( xItem.SubItems[ 3 ].Text, yItem.SubItems[ 3 ].Text );
+                        break;
                 }
-
-                case 2: // Length
-                {
-                    var xLength = ( xItem.Tag is FileInfo ) ? ( xItem.Tag as FileInfo ).Length : -1;
-                    var yLength = ( yItem.Tag is FileInfo ) ? ( yItem.Tag as FileInfo ).Length : -1;
-
-                    compareResult = xLength.CompareTo( yLength );
-                    break;
-                }
-
-                case 3: // Type
-                    compareResult = ObjectCompare.Compare( xItem.SubItems[ 3 ].Text, yItem.SubItems[ 3 ].Text );
-                    break;
             }
 
             if ( OrderOfSort == SortOrder.Descending )
