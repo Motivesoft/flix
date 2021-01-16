@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace flix
         private readonly string defaultLocation = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
 
         private readonly Stack<DirectoryInfo> directoryHistory = new Stack<DirectoryInfo>();
+
+        private readonly Dictionary<DirectoryInfo,int> mruHistory = new Dictionary<DirectoryInfo, int>();
 
         private readonly ListViewColumnSorter listViewColumnSorter = new ListViewColumnSorter();
 
@@ -169,6 +172,15 @@ namespace flix
                 if ( directoryHistory.Count == 0 || !directoryHistory.Peek().Equals( locationInfo ) )
                 {
                     directoryHistory.Push( locationInfo );
+
+                    if ( mruHistory.ContainsKey( locationInfo ) )
+                    {
+                        mruHistory[ locationInfo ]++;
+                    }
+                    else
+                    {
+                        mruHistory[ locationInfo ] = 0;
+                    }
                 }
             }
             finally
@@ -240,9 +252,9 @@ namespace flix
                 foreach ( var selectedItem in listBrowser.SelectedItems )
                 {
                     var item = ( selectedItem as ListViewItem ).Tag;
-                    if ( item is DirectoryInfo )
+                    if ( item is FileSystemInfo )
                     {
-                        OpenDirectoryView( ( item as DirectoryInfo ).FullName );
+                        Open( item as FileSystemInfo );
                     }
                 }
                 e.Handled = true;
@@ -291,12 +303,30 @@ namespace flix
         private void listBrowser_MouseDoubleClick( object sender, MouseEventArgs e )
         {
             var item = listBrowser.GetItemAt( e.Location.X, e.Location.Y );
-            if ( item != null )
+            if ( item != null && item.Tag is FileSystemInfo )
             {
-                if ( item.Tag is DirectoryInfo )
+                Open( item.Tag as FileSystemInfo );
+            }
+        }
+
+        private void Open( FileSystemInfo item )
+        {
+            var fullName = item.FullName;
+            if ( item is DirectoryInfo )
+            {
+                OpenDirectoryView( fullName );
+            }
+            else if ( item is FileInfo )
+            {
+                new Task( () => 
                 {
-                    OpenDirectoryView( ( item.Tag as DirectoryInfo ).FullName );
-                }
+                    var p = new Process();
+                    p.StartInfo = new ProcessStartInfo( fullName )
+                    {
+                        UseShellExecute = true
+                    };
+                    p.Start();
+                } ).Start();
             }
         }
     }
