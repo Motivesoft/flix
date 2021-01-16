@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,6 +12,12 @@ namespace flix
     {
         public static string GetFileTypeDescription( string fileNameOrExtension )
         {
+            if ( Directory.Exists( fileNameOrExtension ) )
+            {
+                // TODO internationalise this or make it an empty string
+                return "Directory";
+            }
+
             SHFILEINFO shfi;
             if ( IntPtr.Zero != SHGetFileInfo(
                                 fileNameOrExtension,

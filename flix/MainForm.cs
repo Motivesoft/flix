@@ -64,18 +64,31 @@ namespace flix
 
                 listBrowser.BeginUpdate();
                 listBrowser.Items.Clear();
-                listBrowser.Tag = location;
+
+                // Record where we are
+                listBrowser.Tag = new DirectoryInfo( location );
 
                 foreach ( var directory in Directory.GetDirectories( location ) )
                 {
                     var dInfo = new DirectoryInfo( directory );
-                    var fileType = FileTypes.GetFileTypeDescription( dInfo.FullName );
+
+                    // Apply filters
+                    if ( ( dInfo.Attributes & FileAttributes.Hidden ) == FileAttributes.Hidden )
+                    {
+                        continue;
+                    }
+
+                    if ( ( dInfo.Attributes & FileAttributes.System ) == FileAttributes.System )
+                    {
+                        continue;
+                    }
 
                     if ( !imagesSmall.Images.ContainsKey( dInfo.FullName ) )
                     {
                         imagesSmall.Images.Add( dInfo.FullName, FileIcons.GetSmallIcon( dInfo.FullName ) );
                     }
 
+                    var fileType = FileTypes.GetFileTypeDescription( dInfo.FullName );
                     var lfItem = new ListViewItem {
                         Tag = dInfo,
                         Text = dInfo.Name,
@@ -104,13 +117,25 @@ namespace flix
                 foreach ( var file in Directory.GetFiles( location ) )
                 {
                     var fInfo = new FileInfo( file );
-                    var length = Math.Ceiling( (double) fInfo.Length / 1024 );
-                    var fileType = FileTypes.GetFileTypeDescription( fInfo.FullName );
+
+                    // Apply filters
+                    if ( ( fInfo.Attributes & FileAttributes.Hidden ) == FileAttributes.Hidden )
+                    {
+                        continue;
+                    }
+
+                    if ( ( fInfo.Attributes & FileAttributes.System ) == FileAttributes.System )
+                    {
+                        continue;
+                    }
 
                     if ( !imagesSmall.Images.ContainsKey( fInfo.FullName ) )
                     {
                         imagesSmall.Images.Add( fInfo.FullName, FileIcons.GetSmallIcon( fInfo.FullName ) );
                     }
+
+                    var length = Math.Ceiling( (double) fInfo.Length / 1024 );
+                    var fileType = FileTypes.GetFileTypeDescription( fInfo.FullName );
 
                     var lfItem = new ListViewItem
                     {
@@ -131,14 +156,18 @@ namespace flix
                         selectionItem = fInfo.FullName;
                     }
 
-                    if ( fInfo.FullName.Equals( selection ) )
+                    if ( fInfo.FullName.Equals( selectionItem ) )
                     {
                         lfItem.Selected = true;
                         lfItem.Focused = true;
                     }
                 }
 
-                directoryHistory.Push( location );
+                // Push the location onto the history stack, but not if we're just refreshing
+                if ( directoryHistory.Count == 0 || !directoryHistory.Peek().Equals( location ) )
+                {
+                    directoryHistory.Push( location );
+                }
             }
             finally
             {
@@ -218,11 +247,37 @@ namespace flix
             }
             else if ( e.KeyCode == Keys.Back )
             {
-                // Remove the directory we're running from
+                // Previous folder from history
                 if ( directoryHistory.Count > 1 )
                 {
                     var selection = Path.GetFullPath( directoryHistory.Pop() );
                     OpenDirectoryView( directoryHistory.Pop(), selection );
+                }
+            }
+            else if ( e.KeyCode == Keys.Right )
+            {
+                // Go into focused child
+                var focusedItem = listBrowser.FocusedItem;
+                if ( focusedItem != null )
+                {
+                    if ( focusedItem.Tag is DirectoryInfo )
+                    {
+                        OpenDirectoryView( (focusedItem.Tag as DirectoryInfo).FullName );
+                    }
+                }
+            }
+            else if ( e.KeyCode == Keys.Left )
+            {
+                // Go upto parent
+                var currentLocation = listBrowser.Tag;
+                if ( currentLocation is DirectoryInfo )
+                {
+                    var currentFullName = ( currentLocation as DirectoryInfo ).FullName;
+                    var parent = Directory.GetParent( currentFullName );
+                    if ( parent != null )
+                    {
+                        OpenDirectoryView( parent.FullName, currentFullName );
+                    }
                 }
             }
         }
