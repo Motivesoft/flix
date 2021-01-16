@@ -15,7 +15,7 @@ namespace flix
     {
         private readonly string defaultLocation = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
 
-        private readonly Stack<string> directoryHistory = new Stack<string>();
+        private readonly Stack<DirectoryInfo> directoryHistory = new Stack<DirectoryInfo>();
 
         private readonly ListViewColumnSorter listViewColumnSorter = new ListViewColumnSorter();
 
@@ -38,8 +38,9 @@ namespace flix
                 }
                 else if ( File.Exists( suppliedLocation ) )
                 {
-                    location = Directory.GetParent( suppliedLocation ).FullName;
-                    selection = Path.GetFullPath( suppliedLocation );
+                    var fileInfo = new FileInfo( suppliedLocation );
+                    location = fileInfo.DirectoryName;
+                    selection = fileInfo.Name;
                 }
             }
 
@@ -66,7 +67,8 @@ namespace flix
                 listBrowser.Items.Clear();
 
                 // Record where we are
-                listBrowser.Tag = new DirectoryInfo( location );
+                var locationInfo = new DirectoryInfo( location );
+                listBrowser.Tag = locationInfo;
 
                 foreach ( var directory in Directory.GetDirectories( location ) )
                 {
@@ -104,10 +106,10 @@ namespace flix
                     // Make a default selection if there isn't a provided one
                     if ( string.IsNullOrEmpty( selectionItem ) )
                     {
-                        selectionItem = dInfo.FullName;
+                        selectionItem = dInfo.Name;
                     }
 
-                    if ( dInfo.FullName.Equals( selectionItem ) )
+                    if ( dInfo.Name.Equals( selectionItem ) )
                     {
                         lfItem.Selected = true;
                         lfItem.Focused = true;
@@ -153,10 +155,10 @@ namespace flix
                     // Make a default selection if there isn't a provided one
                     if ( string.IsNullOrEmpty( selectionItem ) )
                     {
-                        selectionItem = fInfo.FullName;
+                        selectionItem = fInfo.Name;
                     }
 
-                    if ( fInfo.FullName.Equals( selectionItem ) )
+                    if ( fInfo.Name.Equals( selectionItem ) )
                     {
                         lfItem.Selected = true;
                         lfItem.Focused = true;
@@ -164,9 +166,9 @@ namespace flix
                 }
 
                 // Push the location onto the history stack, but not if we're just refreshing
-                if ( directoryHistory.Count == 0 || !directoryHistory.Peek().Equals( location ) )
+                if ( directoryHistory.Count == 0 || !directoryHistory.Peek().Equals( locationInfo ) )
                 {
-                    directoryHistory.Push( location );
+                    directoryHistory.Push( locationInfo );
                 }
             }
             finally
@@ -250,8 +252,12 @@ namespace flix
                 // Previous folder from history
                 if ( directoryHistory.Count > 1 )
                 {
-                    var selection = Path.GetFullPath( directoryHistory.Pop() );
-                    OpenDirectoryView( directoryHistory.Pop(), selection );
+                    // Take the current location off the stack
+                    var current = directoryHistory.Pop();
+                    var previous = directoryHistory.Pop();
+
+                    // If we are going back up the hierarchy, try and retain the current folder as the selected/focused one
+                    OpenDirectoryView( previous.FullName, previous.Equals( current.Parent ) ? current.Name : "" );
                 }
             }
             else if ( e.KeyCode == Keys.Right )
@@ -272,11 +278,11 @@ namespace flix
                 var currentLocation = listBrowser.Tag;
                 if ( currentLocation is DirectoryInfo )
                 {
-                    var currentFullName = ( currentLocation as DirectoryInfo ).FullName;
-                    var parent = Directory.GetParent( currentFullName );
+                    var currentDirectory = currentLocation as DirectoryInfo;
+                    var parent = Directory.GetParent( currentDirectory.FullName );
                     if ( parent != null )
                     {
-                        OpenDirectoryView( parent.FullName, currentFullName );
+                        OpenDirectoryView( parent.FullName, currentDirectory.Name );
                     }
                 }
             }
