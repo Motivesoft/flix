@@ -257,7 +257,7 @@ namespace flix
                     var previous = directoryHistory.Pop();
 
                     // If we are going back up the hierarchy, try and retain the current folder as the selected/focused one
-                    OpenDirectoryView( previous.FullName, previous.Equals( current.Parent ) ? current.Name : "" );
+                    OpenDirectoryView( previous.FullName, String.Equals( previous.FullName, current.Parent.FullName ) ? current.Name : "" );
                 }
             }
             else if ( e.KeyCode == Keys.Right )
@@ -284,6 +284,18 @@ namespace flix
                     {
                         OpenDirectoryView( parent.FullName, currentDirectory.Name );
                     }
+                }
+            }
+        }
+
+        private void listBrowser_MouseDoubleClick( object sender, MouseEventArgs e )
+        {
+            var item = listBrowser.GetItemAt( e.Location.X, e.Location.Y );
+            if ( item != null )
+            {
+                if ( item.Tag is DirectoryInfo )
+                {
+                    OpenDirectoryView( ( item.Tag as DirectoryInfo ).FullName );
                 }
             }
         }

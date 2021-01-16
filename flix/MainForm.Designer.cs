@@ -86,6 +86,7 @@ namespace flix
             this.listBrowser.View = System.Windows.Forms.View.Details;
             this.listBrowser.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listBrowser_ColumnClick);
             this.listBrowser.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBrowser_KeyDown);
+            this.listBrowser.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBrowser_MouseDoubleClick);
             this.listBrowser.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.listBrowser_PreviewKeyDown);
             // 
             // columnName
