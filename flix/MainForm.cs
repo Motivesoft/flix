@@ -22,6 +22,10 @@ namespace flix
 
         private readonly ListViewColumnSorter listViewColumnSorter = new ListViewColumnSorter();
 
+        private readonly IContext Context;
+
+        private readonly Commands Commands;
+
         public MainForm( string[] args )
         {
             InitializeComponent();
@@ -49,6 +53,9 @@ namespace flix
 
             // Run
             OpenDirectoryView( location, selection );
+
+            Context = new FlixContext( this );
+            Commands = new Commands();
         }
 
         private void OpenDirectoryView( string location, string selection = "" )
@@ -214,17 +221,13 @@ namespace flix
             listBrowser.Sort();
         }
 
-        private void textLocation_PreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
+        private void textLocation_KeyDown( object sender, KeyEventArgs e )
         {
             if ( e.KeyCode == Keys.D && e.Alt )
             {
                 textLocation.SelectAll();
             }
-        }
-
-        private void textLocation_KeyDown( object sender, KeyEventArgs e )
-        {
-            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
+            else if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
             {
                 OpenDirectoryView( textLocation.Text );
                 e.Handled = true;
@@ -236,25 +239,22 @@ namespace flix
             }
         }
 
-        private void listBrowser_PreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
+        private void listBrowser_KeyDown( object sender, KeyEventArgs e )
         {
             if ( e.KeyCode == Keys.D && e.Alt )
             {
                 textLocation.Focus();
                 textLocation.SelectAll();
             }
-        }
-
-        private void listBrowser_KeyDown( object sender, KeyEventArgs e )
-        {
-            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
+            else if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
             {
                 foreach ( var selectedItem in listBrowser.SelectedItems )
                 {
                     var item = ( selectedItem as ListViewItem ).Tag;
                     if ( item is FileSystemInfo )
                     {
-                        Open( item as FileSystemInfo );
+                        // No configuration here, merely do a standard Open here - for now, at least
+                        Commands.Run( BuiltInCommands.Open, Context );
                     }
                 }
                 e.Handled = true;
@@ -302,31 +302,73 @@ namespace flix
 
         private void listBrowser_MouseDoubleClick( object sender, MouseEventArgs e )
         {
+            // If on an item, do something. Otherwise...?
             var item = listBrowser.GetItemAt( e.Location.X, e.Location.Y );
             if ( item != null && item.Tag is FileSystemInfo )
             {
-                Open( item.Tag as FileSystemInfo );
+                // No configuration here, merely do a standard Open here
+                Commands.Run( BuiltInCommands.Open, Context );
             }
         }
 
-        private void Open( FileSystemInfo item )
+        class FlixContext : IContext
         {
-            var fullName = item.FullName;
-            if ( item is DirectoryInfo )
+            private readonly MainForm Form;
+
+            public FlixContext( MainForm form )
             {
-                OpenDirectoryView( fullName );
+                Form = form;
             }
-            else if ( item is FileInfo )
+
+            public override IEnumerable<FileSystemInfo> SelectedItems
             {
-                new Task( () => 
+                get
+                {
+                    var selection = new List<FileSystemInfo>();
+                    foreach ( var item in Form.listBrowser.SelectedItems )
+                    {
+                        if ( item is ListViewItem )
+                        {
+                            selection.Add( ( item as ListViewItem ).Tag as FileSystemInfo );
+                        }
+                    }
+                    return selection;
+                }
+            }
+
+            public override FileSystemInfo FocusedItem
+            {
+                get
+                {
+                    var item = Form.listBrowser.FocusedItem;
+                    return item == null ? null : ( item as ListViewItem ).Tag as FileSystemInfo;
+                }
+            }
+
+            public override void OpenWithDefaultProgram( FileSystemInfo fileInfo )
+            {
+                new Task( () =>
                 {
                     var p = new Process();
-                    p.StartInfo = new ProcessStartInfo( fullName )
+                    p.StartInfo = new ProcessStartInfo( fileInfo.FullName )
                     {
                         UseShellExecute = true
                     };
                     p.Start();
                 } ).Start();
+            }
+
+            public override void OpenDirectory( FileSystemInfo fileSystemInfo )
+            {
+                if ( IsDirectory( fileSystemInfo ) )
+                {
+                    Form.OpenDirectoryView( fileSystemInfo.FullName );
+                }
+                else if( fileSystemInfo is FileInfo )
+                {
+                    var fileInfo = fileSystemInfo as FileInfo;
+                    Form.OpenDirectoryView(  fileInfo.DirectoryName, fileInfo.Name );
+                }
             }
         }
     }
