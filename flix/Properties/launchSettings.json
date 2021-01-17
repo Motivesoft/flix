@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "flix": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\"
+    }
+  }
+}
