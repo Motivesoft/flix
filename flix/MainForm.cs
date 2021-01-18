@@ -223,61 +223,20 @@ namespace flix
 
         private void textLocation_KeyDown( object sender, KeyEventArgs e )
         {
-            var x = new StringBuilder();
-            if ( e.Control )
-            {
-                if ( e.KeyCode == Keys.ControlKey )
-                {
-                    return;
-                }
-                x.Append( "ctrl+" );
-            }
-            if ( e.Shift )
-            {
-                if ( e.KeyCode == Keys.ShiftKey )
-                {
-                    return;
-                }
-                x.Append( "shift+" );
-            }
-            if ( e.Alt )
-            {
-                if ( e.KeyCode == Keys.Menu )
-                {
-                    return;
-                }
-                x.Append( "alt+" );
-            }
+            e.Handled = Utilities.ProcessKeyStoke( e, (k) => Commands.Process( k, Control.AddressBar, Context ) );
 
-
-            x.Append( e.KeyCode );
-            var k = x.ToString();
-
-            Commands.Process( k, Context );
-            if ( e.KeyCode == Keys.D && e.Alt )
-            {
-                //textLocation.SelectAll();
-            }
-            else if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
+            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
             {
                 OpenDirectoryView( textLocation.Text );
-                e.Handled = true;
-            }
-            else if ( e.KeyCode == Keys.Down )
-            {
-                listBrowser.Focus();
                 e.Handled = true;
             }
         }
 
         private void listBrowser_KeyDown( object sender, KeyEventArgs e )
         {
-            if ( e.KeyCode == Keys.D && e.Alt )
-            {
-                textLocation.Focus();
-                textLocation.SelectAll();
-            }
-            else if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
+            e.Handled = Utilities.ProcessKeyStoke( e, ( k ) => Commands.Process( k, Control.List, Context ) );
+
+            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
             {
                 foreach ( var selectedItem in listBrowser.SelectedItems )
                 {
@@ -376,13 +335,21 @@ namespace flix
                 }
             }
 
-            public override void SelectAddressBar( string newContent = "" )
+            public override void SwitchToList()
             {
-                if ( !String.IsNullOrEmpty( newContent ) )
+                if ( !Form.listBrowser.Focused )
                 {
-                    Form.textLocation.Text = newContent;
+                    Form.listBrowser.Focus();
                 }
-                Form.textLocation.Focus();
+            }
+
+            public override void SwitchToAddressBar()
+            {
+                if ( !Form.textLocation.Focused )
+                {
+                    Form.textLocation.Focus();
+                }
+
                 Form.textLocation.SelectAll();
             }
 

@@ -38,9 +38,10 @@ namespace flix
             }
         }
 
-        public void Run( string uniqueId, IContext context, string invocationString = "" )
+        public bool Run( string uniqueId, IContext context, string invocationString = "" )
         {
-            if ( CommandSet.ContainsKey( uniqueId ) )
+            bool result = CommandSet.ContainsKey( uniqueId );
+            if ( result )
             {
                 var command = CommandSet[ uniqueId ];
                 command.GetRunner().Invoke( context, invocationString );
@@ -49,17 +50,39 @@ namespace flix
             {
                 throw new ArgumentException( $"Command ID unknown: {uniqueId}" );
             }
+
+            return result;
         }
 
-        public void Process( string keystroke, IContext context, string invocationString = "" )
+        public bool Process( string keystroke, Control control, IContext context, string invocationString = "" )
         {
-            var keyConfig = new Dictionary<string, string>();
-            keyConfig.Add( "alt+D", BuiltInCommands.SelectAddressBar );
+            var keyConfig = GetKeyConfig( control );
 
             if ( keyConfig.ContainsKey( keystroke ) )
             {
-                Run( keyConfig[ keystroke ], context, invocationString );
+                return Run( keyConfig[ keystroke ], context, invocationString );
             }
+
+            return false;
+        }
+
+        private Dictionary<string, string> GetKeyConfig( Control control )
+        {
+            Dictionary<string, string> keyConfig = new Dictionary<string, string>();
+
+            switch ( control )
+            {
+                case Control.AddressBar:
+                    keyConfig.Add( "alt+D", BuiltInCommands.SwitchToAddressBar );
+                    keyConfig.Add( "Down", BuiltInCommands.SwitchToList );
+                    break;
+
+                case Control.List:
+                    keyConfig.Add( "alt+D", BuiltInCommands.SwitchToAddressBar );
+                    break;
+            }
+
+            return keyConfig;
         }
     }
 

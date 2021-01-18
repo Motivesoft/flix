@@ -9,7 +9,8 @@ namespace flix
     public class BuiltInCommands
     {
         public readonly static string Open = "flix.default-commands.open";
-        public readonly static string SelectAddressBar = "flix.default-commands.addressbar";
+        public readonly static string SwitchToAddressBar = "flix.default-commands.addressBar";
+        public readonly static string SwitchToList = "flix.default-commands.switchToList";
     }
 
     public class OpenCommand : ICommand
@@ -44,7 +45,7 @@ namespace flix
 
     public class SelectAddressBarCommand : ICommand
     {
-        string ICommand.UniqueId => BuiltInCommands.SelectAddressBar;
+        string ICommand.UniqueId => BuiltInCommands.SwitchToAddressBar;
 
         string ICommand.DisplayName => "Select Address Bar";
 
@@ -57,7 +58,27 @@ namespace flix
         {
             public void Invoke( IContext context, string invocationString )
             {
-                context.SelectAddressBar( invocationString );
+                context.SwitchToAddressBar();
+            }
+        }
+    }
+
+    public class SwitchToListCommand : ICommand
+    {
+        string ICommand.UniqueId => BuiltInCommands.SwitchToList;
+
+        string ICommand.DisplayName => "Switch To List";
+
+        public IRunner GetRunner()
+        {
+            return new Runner();
+        }
+
+        class Runner : IRunner
+        {
+            public void Invoke( IContext context, string invocationString )
+            {
+                context.SwitchToList();
             }
         }
     }
