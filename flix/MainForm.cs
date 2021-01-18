@@ -223,9 +223,40 @@ namespace flix
 
         private void textLocation_KeyDown( object sender, KeyEventArgs e )
         {
+            var x = new StringBuilder();
+            if ( e.Control )
+            {
+                if ( e.KeyCode == Keys.ControlKey )
+                {
+                    return;
+                }
+                x.Append( "ctrl+" );
+            }
+            if ( e.Shift )
+            {
+                if ( e.KeyCode == Keys.ShiftKey )
+                {
+                    return;
+                }
+                x.Append( "shift+" );
+            }
+            if ( e.Alt )
+            {
+                if ( e.KeyCode == Keys.Menu )
+                {
+                    return;
+                }
+                x.Append( "alt+" );
+            }
+
+
+            x.Append( e.KeyCode );
+            var k = x.ToString();
+
+            Commands.Process( k, Context );
             if ( e.KeyCode == Keys.D && e.Alt )
             {
-                textLocation.SelectAll();
+                //textLocation.SelectAll();
             }
             else if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
             {
@@ -343,6 +374,16 @@ namespace flix
                     var item = Form.listBrowser.FocusedItem;
                     return item == null ? null : ( item as ListViewItem ).Tag as FileSystemInfo;
                 }
+            }
+
+            public override void SelectAddressBar( string newContent = "" )
+            {
+                if ( !String.IsNullOrEmpty( newContent ) )
+                {
+                    Form.textLocation.Text = newContent;
+                }
+                Form.textLocation.Focus();
+                Form.textLocation.SelectAll();
             }
 
             public override void OpenWithDefaultProgram( FileSystemInfo fileInfo )

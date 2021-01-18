@@ -50,6 +50,17 @@ namespace flix
                 throw new ArgumentException( $"Command ID unknown: {uniqueId}" );
             }
         }
+
+        public void Process( string keystroke, IContext context, string invocationString = "" )
+        {
+            var keyConfig = new Dictionary<string, string>();
+            keyConfig.Add( "alt+D", BuiltInCommands.SelectAddressBar );
+
+            if ( keyConfig.ContainsKey( keystroke ) )
+            {
+                Run( keyConfig[ keystroke ], context, invocationString );
+            }
+        }
     }
 
     public interface ICommand
@@ -70,40 +81,5 @@ namespace flix
     public interface IRunner
     {
         void Invoke( IContext context, string invocationString );
-    }
-
-    public class BuiltInCommands
-    {
-        public readonly static string Open = "flix.default-commands.open";
-    }
-
-    public class OpenCommand : ICommand
-    {
-        string ICommand.UniqueId => BuiltInCommands.Open;
-
-        string ICommand.DisplayName => "Open";
-
-        public IRunner GetRunner()
-        {
-            return new Runner();
-        }
-
-        class Runner : IRunner
-        {
-            public void Invoke( IContext context, string invocationString )
-            {
-                foreach ( var item in context.SelectedItems )
-                {
-                    if ( context.IsDirectory( item ) )
-                    {
-                        context.OpenDirectory( item );
-                    }
-                    else if ( context.IsFile( item ) )
-                    {
-                        context.OpenWithDefaultProgram( item );
-                    }
-                }
-            }
-        }
     }
 }

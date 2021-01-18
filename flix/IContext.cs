@@ -25,6 +25,7 @@ namespace flix
             return fileSystemInfo is FileInfo;
         }
 
+        public abstract void SelectAddressBar( string newContent = "" );
         public abstract void OpenDirectory( FileSystemInfo fileSystemInfo );
         public abstract void OpenWithDefaultProgram( FileSystemInfo fileInfo );
     }
