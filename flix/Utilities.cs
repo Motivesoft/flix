@@ -14,14 +14,17 @@ namespace flix
             void Process( string keystroke );
         }
 
-        public static bool ProcessKeyStoke( KeyEventArgs e, Func<string, bool> a )
+        public static bool ProcessKeyStoke( KeyEventArgs e, Func<string, bool> action )
         {
+            // If only a modifier, stop processing
             if ( e.KeyCode == Keys.ControlKey || e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.Menu )
             {
                 return false;
             }
 
             var keyString = new StringBuilder();
+
+            // Modifiers
             if ( e.Control )
             {
                 keyString.Append( "ctrl+" );
@@ -35,9 +38,18 @@ namespace flix
                 keyString.Append( "alt+" );
             }
 
-            keyString.Append( e.KeyCode );
+            // Normalise
+            var keyCode = e.KeyCode;
+            if ( e.KeyCode == Keys.Return )
+            {
+                keyCode = Keys.Enter;
+            }
 
-            return a( keyString.ToString() );
+            // Complete the string
+            keyString.Append( keyCode );
+
+            // Process the keystroke
+            return action( keyString.ToString() );
         }
     }
 }
