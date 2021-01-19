@@ -229,20 +229,6 @@ namespace flix
         private void listBrowser_KeyDown( object sender, KeyEventArgs e )
         {
             e.Handled = Utilities.ProcessKeyStoke( e, ( k ) => Commands.Process( k, Control.List, Context ) );
-
-            if ( e.KeyCode == Keys.Back )
-            {
-                // Previous folder from history
-                if ( directoryHistory.Count > 1 )
-                {
-                    // Take the current location off the stack
-                    var current = directoryHistory.Pop();
-                    var previous = directoryHistory.Pop();
-
-                    // If we are going back up the hierarchy, try and retain the current folder as the selected/focused one
-                    OpenDirectoryView( previous.FullName, String.Equals( previous.FullName, current.Parent.FullName ) ? current.Name : "" );
-                }
-            }
         }
 
         private void listBrowser_MouseDoubleClick( object sender, MouseEventArgs e )
@@ -321,6 +307,20 @@ namespace flix
                     };
                     p.Start();
                 } ).Start();
+            }
+
+            public override void PreviousDirectory()
+            {
+                // Previous folder from history
+                if ( Form.directoryHistory.Count > 1 )
+                {
+                    // Take the current location off the stack
+                    var current = Form.directoryHistory.Pop();
+                    var previous = Form.directoryHistory.Pop();
+
+                    // If we are going back up the hierarchy, try and retain the current folder as the selected/focused one
+                    Form.OpenDirectoryView( previous.FullName, String.Equals( previous.FullName, current.Parent.FullName ) ? current.Name : "" );
+                }
             }
 
             public override void UpDirectory()

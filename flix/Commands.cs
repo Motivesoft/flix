@@ -83,6 +83,7 @@ namespace flix
                     keyConfig.Add( "Return", BuiltInCommands.Open );
                     keyConfig.Add( "Left", BuiltInCommands.OpenParentDirectory );
                     keyConfig.Add( "Right", BuiltInCommands.OpenChildDirectory );
+                    keyConfig.Add( "Back", BuiltInCommands.OpenPreviousDirectory );
                     break;
             }
 

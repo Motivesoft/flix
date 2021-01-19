@@ -15,6 +15,7 @@ namespace flix
         public readonly static string OpenFromAddressBar = "flix.default-commands.openFromAddressBar";
         public readonly static string OpenParentDirectory = "flix.default-commands.openParent";
         public readonly static string OpenChildDirectory = "flix.default-commands.openChild";
+        public readonly static string OpenPreviousDirectory = "flix.default-commands.openPrevious";
     }
 
     public class OpenCommand : ICommand
@@ -63,6 +64,26 @@ namespace flix
             public void Invoke( IContext context, string invocationString )
             {
                 context.OpenFromAddressBar( invocationString );
+            }
+        }
+    }
+
+    public class OpenPreviousCommand : ICommand
+    {
+        string ICommand.UniqueId => BuiltInCommands.OpenPreviousDirectory;
+
+        string ICommand.DisplayName => "Open Previous Directory";
+
+        public IRunner GetRunner()
+        {
+            return new Runner();
+        }
+
+        class Runner : IRunner
+        {
+            public void Invoke( IContext context, string invocationString )
+            {
+                context.PreviousDirectory();
             }
         }
     }

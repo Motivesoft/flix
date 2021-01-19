@@ -32,6 +32,7 @@ namespace flix
 
         public abstract void SwitchToList();
         public abstract void SwitchToAddressBar();
+        public abstract void PreviousDirectory();
         public abstract void UpDirectory();
         public abstract void OpenWithDefaultProgram( FileSystemInfo fileInfo );
         public abstract void OpenDirectory( FileSystemInfo fileSystemInfo );
