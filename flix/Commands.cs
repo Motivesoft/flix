@@ -75,10 +75,14 @@ namespace flix
                 case Control.AddressBar:
                     keyConfig.Add( "alt+D", BuiltInCommands.SwitchToAddressBar );
                     keyConfig.Add( "Down", BuiltInCommands.SwitchToList );
+                    keyConfig.Add( "Return", BuiltInCommands.OpenFromAddressBar );
                     break;
 
                 case Control.List:
                     keyConfig.Add( "alt+D", BuiltInCommands.SwitchToAddressBar );
+                    keyConfig.Add( "Return", BuiltInCommands.Open );
+                    keyConfig.Add( "Left", BuiltInCommands.OpenParentDirectory );
+                    keyConfig.Add( "Right", BuiltInCommands.OpenChildDirectory );
                     break;
             }
 

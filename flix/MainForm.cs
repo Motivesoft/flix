@@ -224,32 +224,13 @@ namespace flix
         private void textLocation_KeyDown( object sender, KeyEventArgs e )
         {
             e.Handled = Utilities.ProcessKeyStoke( e, (k) => Commands.Process( k, Control.AddressBar, Context ) );
-
-            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
-            {
-                OpenDirectoryView( textLocation.Text );
-                e.Handled = true;
-            }
         }
 
         private void listBrowser_KeyDown( object sender, KeyEventArgs e )
         {
             e.Handled = Utilities.ProcessKeyStoke( e, ( k ) => Commands.Process( k, Control.List, Context ) );
 
-            if ( e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return )
-            {
-                foreach ( var selectedItem in listBrowser.SelectedItems )
-                {
-                    var item = ( selectedItem as ListViewItem ).Tag;
-                    if ( item is FileSystemInfo )
-                    {
-                        // No configuration here, merely do a standard Open here - for now, at least
-                        Commands.Run( BuiltInCommands.Open, Context );
-                    }
-                }
-                e.Handled = true;
-            }
-            else if ( e.KeyCode == Keys.Back )
+            if ( e.KeyCode == Keys.Back )
             {
                 // Previous folder from history
                 if ( directoryHistory.Count > 1 )
@@ -260,32 +241,6 @@ namespace flix
 
                     // If we are going back up the hierarchy, try and retain the current folder as the selected/focused one
                     OpenDirectoryView( previous.FullName, String.Equals( previous.FullName, current.Parent.FullName ) ? current.Name : "" );
-                }
-            }
-            else if ( e.KeyCode == Keys.Right )
-            {
-                // Go into focused child
-                var focusedItem = listBrowser.FocusedItem;
-                if ( focusedItem != null )
-                {
-                    if ( focusedItem.Tag is DirectoryInfo )
-                    {
-                        OpenDirectoryView( (focusedItem.Tag as DirectoryInfo).FullName );
-                    }
-                }
-            }
-            else if ( e.KeyCode == Keys.Left )
-            {
-                // Go upto parent
-                var currentLocation = listBrowser.Tag;
-                if ( currentLocation is DirectoryInfo )
-                {
-                    var currentDirectory = currentLocation as DirectoryInfo;
-                    var parent = Directory.GetParent( currentDirectory.FullName );
-                    if ( parent != null )
-                    {
-                        OpenDirectoryView( parent.FullName, currentDirectory.Name );
-                    }
                 }
             }
         }
@@ -335,6 +290,8 @@ namespace flix
                 }
             }
 
+            public override DirectoryInfo CurrentLocation => Form.listBrowser.Tag as DirectoryInfo;
+
             public override void SwitchToList()
             {
                 if ( !Form.listBrowser.Focused )
@@ -366,6 +323,17 @@ namespace flix
                 } ).Start();
             }
 
+            public override void UpDirectory()
+            {
+                // Go upto parent
+                var currentDirectory = CurrentLocation;
+                var parent = Directory.GetParent( currentDirectory.FullName );
+                if ( parent != null )
+                {
+                    Form.OpenDirectoryView( parent.FullName, currentDirectory.Name );
+                }
+            }
+
             public override void OpenDirectory( FileSystemInfo fileSystemInfo )
             {
                 if ( IsDirectory( fileSystemInfo ) )
@@ -377,6 +345,16 @@ namespace flix
                     var fileInfo = fileSystemInfo as FileInfo;
                     Form.OpenDirectoryView(  fileInfo.DirectoryName, fileInfo.Name );
                 }
+            }
+
+            public override void OpenFromAddressBar( string location = "" )
+            {
+                if ( !string.IsNullOrEmpty( location ) )
+                {
+                    Form.textLocation.Text = location;
+                }
+
+                Form.OpenDirectoryView( Form.textLocation.Text );
             }
         }
     }

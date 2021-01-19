@@ -38,15 +38,8 @@ namespace flix
                 keyString.Append( "alt+" );
             }
 
-            // Normalise
-            var keyCode = e.KeyCode;
-            if ( e.KeyCode == Keys.Return )
-            {
-                keyCode = Keys.Enter;
-            }
-
             // Complete the string
-            keyString.Append( keyCode );
+            keyString.Append( e.KeyCode );
 
             // Process the keystroke
             return action( keyString.ToString() );

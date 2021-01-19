@@ -15,6 +15,11 @@ namespace flix
             get;
         }
 
+        public abstract DirectoryInfo CurrentLocation
+        {
+            get;
+        }
+
         public bool IsDirectory( FileSystemInfo fileSystemInfo )
         {
             return fileSystemInfo is DirectoryInfo;
@@ -27,7 +32,9 @@ namespace flix
 
         public abstract void SwitchToList();
         public abstract void SwitchToAddressBar();
-        public abstract void OpenDirectory( FileSystemInfo fileSystemInfo );
+        public abstract void UpDirectory();
         public abstract void OpenWithDefaultProgram( FileSystemInfo fileInfo );
+        public abstract void OpenDirectory( FileSystemInfo fileSystemInfo );
+        public abstract void OpenFromAddressBar( string location = "" );
     }
 }
