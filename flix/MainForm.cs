@@ -175,6 +175,12 @@ namespace flix
                     }
                 }
 
+                if ( listBrowser.SelectedIndices.Count > 0 )
+                {
+                    var index = listBrowser.SelectedIndices[ 0 ];
+                    listBrowser.EnsureVisible( index );
+                }
+
                 // Push the location onto the history stack, but not if we're just refreshing
                 if ( directoryHistory.Count == 0 || !directoryHistory.Peek().Equals( locationInfo ) )
                 {
@@ -347,14 +353,25 @@ namespace flix
                 }
             }
 
-            public override void OpenFromAddressBar( string location = "" )
+            public override void OpenFromAddressBar( string invocationString = "" )
             {
-                if ( !string.IsNullOrEmpty( location ) )
-                {
-                    Form.textLocation.Text = location;
-                }
+                var location = Form.textLocation.Text;
 
-                Form.OpenDirectoryView( Form.textLocation.Text );
+                if ( Directory.Exists( location ) )
+                {
+                    Form.OpenDirectoryView( Form.textLocation.Text );
+                    Form.listBrowser.Focus();
+                }
+                else if ( File.Exists( location ) )
+                {
+                    var fileInfo = new FileInfo( location );
+                    Form.OpenDirectoryView( fileInfo.DirectoryName, fileInfo.Name );
+                    Form.listBrowser.Focus();
+                }
+                else
+                {
+                    MessageBox.Show( $"{location} does not exist", "Error" );
+                }
             }
         }
     }

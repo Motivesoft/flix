@@ -36,6 +36,6 @@ namespace flix
         public abstract void UpDirectory();
         public abstract void OpenWithDefaultProgram( FileSystemInfo fileInfo );
         public abstract void OpenDirectory( FileSystemInfo fileSystemInfo );
-        public abstract void OpenFromAddressBar( string location = "" );
+        public abstract void OpenFromAddressBar( string invocationString = "" );
     }
 }
